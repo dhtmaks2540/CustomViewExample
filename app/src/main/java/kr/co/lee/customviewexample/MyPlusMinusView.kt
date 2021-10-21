@@ -6,15 +6,21 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
-class MyPlusMinusView: View {
+// @JvmOverloads 어노테이션을 넣어서 생성자의 parameter가 기본값으로 대체하도록 지시
+// 생성자 3개를 정의하는 부분을 아래의 한줄로 줄이기
+class MyPlusMinusView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
     // 증감 값
     var value: Int = 0
     // 화면 출력 이미지
-    lateinit var plusBitmap: Bitmap
-    lateinit var minusBitmap: Bitmap
+    var plusBitmap: Bitmap
+    var minusBitmap: Bitmap
     // 이미지가 화면에 출력되는 좌표 정보
-    lateinit var plusRectDst: Rect
-    lateinit var minusRectDst: Rect
+    var plusRectDst: Rect
+    var minusRectDst: Rect
 
     // value 출력 문자열 색상
     var textColor: Int? = null
@@ -22,7 +28,28 @@ class MyPlusMinusView: View {
     // Observer를 등록하기 위한 객체
     var listeners: ArrayList<OnMyChangeListener>? = null
 
-    // 생성자 호출
+    // 초기화
+    init {
+        // 이미지 획득
+        plusBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.plus)
+        minusBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.minus)
+
+        // 이미지 출력 사각형 좌표 정보 설정
+        // Rect의 생성자로 (left, top), (right, bottom) 정보 주기
+        plusRectDst = Rect(10, 10, 210, 210)
+        minusRectDst = Rect(400, 10, 600, 210)
+
+        // custom 속성값 획득
+        attrs?.let {
+            // 속성 값 추출
+            val a = context.obtainStyledAttributes(attrs, R.styleable.MyView)
+            textColor = a.getColor(R.styleable.MyView_customTextColor, Color.RED)
+        }
+        // ArrayList 객체 생성
+        listeners = ArrayList()
+    }
+
+    /*// 생성자 호출
     constructor(context: Context): super(context) {
         init(null)
     }
@@ -38,7 +65,7 @@ class MyPlusMinusView: View {
         // 이미지 획득
         plusBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.plus)
         minusBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.minus)
-        
+
         // 이미지 출력 사각형 좌표 정보 설정
         // Rect의 생성자로 (left, top), (right, bottom) 정보 주기
         plusRectDst = Rect(10, 10, 210, 210)
@@ -52,7 +79,7 @@ class MyPlusMinusView: View {
         }
         // ArrayList 객체 생성
         listeners = ArrayList()
-    }
+    }*/
 
     // Observer 등록을 위한 함수
     fun setOnMyChangeListener(listener: OnMyChangeListener) {
