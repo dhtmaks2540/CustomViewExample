@@ -15,9 +15,11 @@ class MyPlusMinusView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     // 증감 값
     var value: Int = 0
+
     // 화면 출력 이미지
     var plusBitmap: Bitmap
     var minusBitmap: Bitmap
+
     // 이미지가 화면에 출력되는 좌표 정보
     var plusRectDst: Rect
     var minusRectDst: Rect
@@ -39,25 +41,21 @@ class MyPlusMinusView @JvmOverloads constructor(
         plusRectDst = Rect(10, 10, 210, 210)
         minusRectDst = Rect(400, 10, 600, 210)
 
-        // custom 속성값 획득
-        attrs?.let {
-            // 속성 값 추출
-            val a = context.obtainStyledAttributes(attrs, R.styleable.MyView)
-            textColor = a.getColor(R.styleable.MyView_customTextColor, Color.RED)
+        // 속성값 획득하는 부분
+        context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.MyView,
+            0, 0
+        ).apply {
+            try {
+                textColor = getColor(R.styleable.MyView_customTextColor, Color.RED)
+            } finally {
+                recycle()
+            }
         }
+
         // ArrayList 객체 생성
         listeners = ArrayList()
-    }
-
-    /*// 생성자 호출
-    constructor(context: Context): super(context) {
-        init(null)
-    }
-    constructor(context: Context, attrs: AttributeSet): super(context, attrs) {
-        init(attrs)
-    }
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int): super(context, attrs, defStyleAttr) {
-        init(attrs)
     }
 
     // 생성자의 공통 코드
@@ -79,7 +77,7 @@ class MyPlusMinusView @JvmOverloads constructor(
         }
         // ArrayList 객체 생성
         listeners = ArrayList()
-    }*/
+    }
 
     // Observer 등록을 위한 함수
     fun setOnMyChangeListener(listener: OnMyChangeListener) {
@@ -98,22 +96,22 @@ class MyPlusMinusView @JvmOverloads constructor(
 
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
-        
+
         // 뷰 크기를 지정하기 위한 변수
         var width = 0
         var height = 0
-        
+
         // wrap_content인 경우
-        if(widthMode == MeasureSpec.AT_MOST) {
+        if (widthMode == MeasureSpec.AT_MOST) {
             width = 700
-        // fill_parent, match_parent인 경우
-        } else if(widthMode == MeasureSpec.EXACTLY) {
+            // fill_parent, match_parent인 경우
+        } else if (widthMode == MeasureSpec.EXACTLY) {
             width = widthSize
         }
 
-        if(heightMode == MeasureSpec.AT_MOST) {
+        if (heightMode == MeasureSpec.AT_MOST) {
             height = 250
-        } else if(heightMode == MeasureSpec.EXACTLY) {
+        } else if (heightMode == MeasureSpec.EXACTLY) {
             height = heightSize
         }
 
@@ -128,23 +126,31 @@ class MyPlusMinusView @JvmOverloads constructor(
         val y = event?.y!!
 
         // 플러스 아이콘이 터치된 거라면
-        if(plusRectDst?.contains(x.toInt(), y.toInt())!! && event.action == MotionEvent.ACTION_DOWN) {
+        if (plusRectDst?.contains(
+                x.toInt(),
+                y.toInt()
+            )!! && event.action == MotionEvent.ACTION_DOWN
+        ) {
             // 데이터 변경
             value++
             // 화면 갱신(invalidate()를 호출하면 자동으로 onDraw() 함수가 호출된다)
             invalidate()
             listeners?.let {
-                for(listener in it) {
+                for (listener in it) {
                     // observer에 데이터 전달
                     listener.onChange(value)
                 }
             }
             return true
-        } else if(minusRectDst?.contains(x.toInt(), y.toInt())!! && event.action == MotionEvent.ACTION_DOWN) {
+        } else if (minusRectDst?.contains(
+                x.toInt(),
+                y.toInt()
+            )!! && event.action == MotionEvent.ACTION_DOWN
+        ) {
             value--
             invalidate()
             listeners?.let {
-                for(listener in it) {
+                for (listener in it) {
                     listener.onChange(value)
                 }
             }
@@ -157,7 +163,7 @@ class MyPlusMinusView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         // 화면 지우기
         canvas?.drawColor(Color.alpha(Color.CYAN))
-        
+
         // 이미지의 사각형 정보
         val plusRectSource = Rect(0, 0, plusBitmap.width, plusBitmap.height)
         val minusRectSource = Rect(0, 0, minusBitmap.width, minusBitmap.height)
@@ -169,11 +175,11 @@ class MyPlusMinusView @JvmOverloads constructor(
 
         // value 문자열 그리기
         paint.textSize = 80f
-        if(textColor != null) {
+        if (textColor != null) {
             paint.color = textColor as Int
         }
         canvas?.drawText(value.toString(), 260f, 150f, paint)
-        
+
         // minus 이미지 그리기
         canvas?.drawBitmap(minusBitmap, minusRectSource, minusRectDst, null)
     }
